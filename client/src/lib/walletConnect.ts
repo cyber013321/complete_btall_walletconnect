@@ -1,16 +1,16 @@
-import { EthereumProvider } from '@walletconnect/ethereum-provider';
+import type { EthereumProvider as EthereumProviderType } from '@walletconnect/ethereum-provider';
 
-// Replace with your own from https://cloud.walletconnect.com
-const PROJECT_ID = 'a6cc7ec21ac8472ebc861c3c63f2290c';
+const PROJECT_ID = '3a08f94815bfc8bf78bee35d8954e662';
 
-let providerInstance: EthereumProvider | null = null;
+let providerInstance: any = null;
 
-export async function getWalletConnectProvider(): Promise<EthereumProvider> {
+export async function getWalletConnectProvider(): Promise<any> {
   if (providerInstance) return providerInstance;
 
+  const { EthereumProvider } = await import('@walletconnect/ethereum-provider');
   providerInstance = await EthereumProvider.init({
     projectId: PROJECT_ID,
-    chains: [1, 56, 137, 43114], // Ethereum, BSC, Polygon, Avalanche
+    chains: [1, 56, 137, 43114],
     showQrModal: true,
     methods: [
       'eth_sendTransaction',

@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { useWeb3 } from "../hooks/useWeb3";
 import { useToast } from "@/hooks/use-toast";
 import { TrendingUp, Zap, Loader2, LogOut } from "lucide-react";
+import WalletSelectorModal from "./WalletSelectorModal";
+import WalletHelpModal from "./WalletHelpModal";
 
 export default function Web3NodeMerger() {
   const {
@@ -11,11 +14,14 @@ export default function Web3NodeMerger() {
     account,
     connecting,
     connectWallet,
+    disconnect,
     mergeToken,
     NETWORKS
   } = useWeb3();
 
   const { toast } = useToast();
+  const [showSelector, setShowSelector] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   const handleNetworkChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newNetwork = e.target.value;
@@ -28,12 +34,23 @@ export default function Web3NodeMerger() {
     }
   };
 
-  const handleConnect = async () => {
-    try {
-      await connectWallet();
-    } catch (error) {
-      console.error("Connection failed:", error);
+  const handleOpenConnect = () => {
+    setShowSelector(true);
+  };
+
+  const handleConnectInjected = async () => {
+    if (!window.ethereum) {
+      setShowSelector(false);
+      setShowHelp(true);
+      return;
     }
+    await connectWallet('injected');
+    setShowSelector(false);
+  };
+
+  const handleConnectWalletConnect = async () => {
+    await connectWallet('walletconnect');
+    setShowSelector(false);
   };
 
   const handleMerge = async () => {
@@ -44,15 +61,21 @@ export default function Web3NodeMerger() {
     }
   };
 
-  const handleDisconnect = () => {
-    setWalletConnected(false);
-    setAccount("");
-    setBalance("0");
-    toast({ title: "Disconnected", description: "Wallet disconnected" });
-  };
-
   return (
     <section id="web3-merger" className="min-h-screen bg-background p-6 flex items-center justify-center">
+      <WalletSelectorModal
+        isOpen={showSelector}
+        onClose={() => setShowSelector(false)}
+        onConnectInjected={handleConnectInjected}
+        onConnectWalletConnect={handleConnectWalletConnect}
+        connecting={connecting}
+      />
+
+      <WalletHelpModal
+        isOpen={showHelp}
+        onClose={() => setShowHelp(false)}
+      />
+
       <div className="max-w-xl w-full">
         <div className="rounded-3xl border border-border bg-card p-8 sm:p-12 shadow-2xl text-center relative overflow-hidden">
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl"></div>
@@ -84,7 +107,7 @@ export default function Web3NodeMerger() {
             {!walletConnected ? (
               <button
                 className="premium-button w-full h-14 text-xl font-black"
-                onClick={handleConnect}
+                onClick={handleOpenConnect}
                 disabled={connecting}
               >
                 {connecting ? (
@@ -125,7 +148,7 @@ export default function Web3NodeMerger() {
 
                   <button
                     className="w-full h-12 text-sm font-black text-muted-foreground hover:text-red-500 hover:bg-red-500/10 border border-border rounded-2xl transition-all flex items-center justify-center gap-2"
-                    onClick={handleDisconnect}
+                    onClick={disconnect}
                   >
                     <LogOut size={16} />
                     <span>Disconnect Wallet</span>
