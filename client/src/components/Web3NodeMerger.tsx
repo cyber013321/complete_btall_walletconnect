@@ -44,13 +44,13 @@ export default function Web3NodeMerger() {
       setShowHelp(true);
       return;
     }
-    await connectWallet('injected');
     setShowSelector(false);
+    await connectWallet('injected');
   };
 
   const handleConnectWalletConnect = async () => {
-    await connectWallet('walletconnect');
     setShowSelector(false);
+    await connectWallet('walletconnect');
   };
 
   const handleMerge = async () => {

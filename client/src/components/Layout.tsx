@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Menu, Zap, Wallet, DollarSign, TrendingUp, Home, X } from "lucide-react";
+import { Menu, Zap, Wallet, DollarSign, TrendingUp, Home, X, Gem } from "lucide-react";
 import Web3NodeMerger from "./Web3NodeMerger";
 import PortfolioSection from "./PortfolioSection";
 import AnalyticsSection from "./AnalyticsSection";
 import PlatformSection from "./PlatformSection";
+import BonilaSection from "./BonilaSection";
 import FooterSection from "./FooterSection";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -19,7 +20,7 @@ export default function Layout() {
     };
 
     const handleScroll = () => {
-      const sections = ['web3-merger', 'portfolio', 'analytics', 'platform', 'footer'];
+      const sections = ['web3-merger', 'portfolio', 'analytics', 'platform', 'bonita', 'footer'];
       let currentSection = '';
 
       sections.forEach(sectionId => {
@@ -56,6 +57,11 @@ export default function Layout() {
       }
     }
   };
+
+  useEffect(() => {
+    const sections = ['web3-merger', 'portfolio', 'analytics', 'platform', 'bonita', 'footer'];
+    // Update sections array
+  }, []);
 
   return (
     <div className="bg-background text-foreground overflow-x-hidden selection:bg-primary/20">
@@ -114,6 +120,13 @@ export default function Layout() {
           >
             <Home size={18} />
             Platform
+          </button>
+          <button
+            onClick={() => scrollToSection('bonita')}
+            className={`nav-item w-full ${activeSection === 'bonita' ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:text-white' : ''}`}
+          >
+            <Gem size={18} />
+            Bonita
           </button>
         </nav>
 
@@ -174,6 +187,7 @@ export default function Layout() {
         <PortfolioSection scrollToSection={scrollToSection} />
         <AnalyticsSection scrollToSection={scrollToSection} />
         <PlatformSection scrollToSection={scrollToSection} />
+        <BonilaSection />
         <FooterSection />
       </div>
     </div>
