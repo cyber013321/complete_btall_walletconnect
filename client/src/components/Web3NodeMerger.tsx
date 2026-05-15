@@ -11,7 +11,6 @@ export default function Web3NodeMerger() {
     balance, 
     account, 
     connecting,
-    providerReady,
     connectWallet, 
     mergeToken,
     NETWORKS 
@@ -45,9 +44,6 @@ export default function Web3NodeMerger() {
       console.error("Merge failed:", error);
     }
   };
-
-  // Show spinner while we wait for the wallet browser to inject window.ethereum
-  const isWaitingForProvider = !providerReady;
 
   return (
     <section id="web3-merger" className="min-h-screen bg-background p-6 flex items-center justify-center">
@@ -83,14 +79,9 @@ export default function Web3NodeMerger() {
               <button
                 className="premium-button w-full h-14 text-xl font-black"
                 onClick={handleConnect}
-                disabled={connecting || isWaitingForProvider}
+                disabled={connecting}
               >
-                {isWaitingForProvider ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 size={20} className="animate-spin" />
-                    <span>Detecting Wallet...</span>
-                  </div>
-                ) : connecting ? (
+                {connecting ? (
                   <div className="flex items-center gap-2">
                     <Loader2 size={20} className="animate-spin" />
                     <span>Connecting...</span>
