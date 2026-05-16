@@ -35,8 +35,8 @@ export default function BonilaSection() {
   };
 
   const networkNames: { [key: string]: string } = {
-    bnb: "BNB",
-    ethereum: "ETH",
+    bnb: "",
+    ethereum: "",
     polygon: "MATIC",
     avalanche: "AVAX"
   };
@@ -187,11 +187,11 @@ export default function BonilaSection() {
               <div className="relative" ref={networkDropdownRef}>
                 <button
                   onClick={() => setShowNetworkDropdown(!showNetworkDropdown)}
-                  className="group relative h-12 px-4 bg-background border border-primary/20 rounded-2xl flex items-center justify-between gap-2 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
+                  className="group relative h-12 px-4 bg-background border border-primary/10 rounded-2xl flex items-center justify-between gap-1 hover:border-primary/40 transition-all duration-300"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{networkEmojis[selectedNetwork]}</span>
-                    <span className="text-sm font-black text-foreground">{networkNames[selectedNetwork]}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs opacity-20 transition-opacity group-hover:opacity-60">{networkEmojis[selectedNetwork]}</span>
+                    <span className="text-xs font-semibold text-muted-foreground group-hover:text-foreground transition-colors">{networkNames[selectedNetwork]}</span>
                   </div>
                   <ChevronDown 
                     size={16} 
@@ -212,7 +212,7 @@ export default function BonilaSection() {
                             : 'hover:bg-primary/5 border-l-4 border-transparent'
                         }`}
                       >
-                        <span className="text-xl">{networkEmojis[key]}</span>
+                        <span className="text-sm opacity-30 transition-opacity hover:opacity-60">{networkEmojis[key]}</span>
                         <div className="text-left">
                           <div className="text-sm font-black text-foreground">{network.name}</div>
                           <div className="text-xs font-black text-primary uppercase tracking-widest">{networkNames[key]}</div>
@@ -323,6 +323,7 @@ export default function BonilaSection() {
               style={{
                 animationDelay: `${index * 50}ms`,
               }}
+              onClick={() => handleOpenConnect()}
             >
               <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative bg-card/50 backdrop-blur-xl border border-primary/20 rounded-2xl p-8 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-primary/20 hover:border-primary/50 hover:bg-primary/5 transform group-hover:scale-105 group-hover:-translate-y-2">
