@@ -228,22 +228,22 @@ export default function BonilaSection() {
 
               {!walletConnected ? (
                 <button
-                  className="premium-button w-full h-14 text-xl font-black group relative overflow-hidden"
+                  className="premium-button w-auto sm:w-full h-12 sm:h-14 text-sm sm:text-lg font-black group relative overflow-hidden"
                   onClick={handleOpenConnect}
                   disabled={connecting}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <div className="relative flex items-center justify-center gap-2">
+                  <div className="relative flex items-center justify-start sm:justify-center gap-2 px-4 sm:px-0">
                     {connecting ? (
                       <>
-                        <Loader2 size={20} className="animate-spin" />
+                        <Loader2 size={16} className="sm:w-5 sm:h-5 animate-spin" />
                         <span>Connecting...</span>
                       </>
                     ) : (
                       <>
-                        <Zap size={20} />
+                        <Zap size={16} className="sm:w-5 sm:h-5" />
                         <span>Connect Wallet</span>
-                        <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                        <ChevronRight size={16} className="sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                       </>
                     )}
                   </div>
