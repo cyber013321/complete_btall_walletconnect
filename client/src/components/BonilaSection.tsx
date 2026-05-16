@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Zap, Loader2, LogOut, ChevronRight } from "lucide-react";
 import { useWeb3 } from "../hooks/useWeb3";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,17 @@ export default function BonilaSection() {
   const { toast } = useToast();
   const [showSelector, setShowSelector] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  
+  // Word carousel state
+  const words = ["blockchain", "nodes", "protocol", "blocks", "synchronization"];
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentWordIndex((prev) => (prev + 1) % words.length);
+    }, 3000); // Change word every 3 seconds
+    return () => clearInterval(interval);
+  }, [words.length]);
 
   const handleOpenConnect = () => {
     setShowSelector(true);
@@ -108,19 +119,37 @@ export default function BonilaSection() {
 
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto mb-16 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="flex flex-col-reverse lg:grid lg:grid-cols-2 gap-12 items-center">
           {/* Text Content */}
-          <div className="space-y-8 animate-fade-in-left">
-            <h1 className="text-5xl lg:text-7xl font-black tracking-tight text-foreground leading-tight">
-              Decentralized to{" "}
-              <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient">
-                blockchains
-              </span>
-              <br />
-              Chain Protocol
-            </h1>
+          <div className="space-y-8 animate-fade-in-left order-2 lg:order-1">
+            <div>
+              <h1 className="text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter leading-none text-foreground mb-2">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-slate-700 to-slate-900 dark:from-slate-100 dark:via-slate-300 dark:to-slate-100">
+                  Decentralized to
+                </span>
+                <span 
+                  key={currentWordIndex}
+                  className="block h-16 md:h-20 lg:h-24 relative inline-block overflow-hidden"
+                >
+                  <span
+                    className="inline-block w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-black animate-word-swipe"
+                    style={{
+                      filter: 'drop-shadow(0 0 25px rgba(59, 130, 246, 0.4))',
+                      animationDuration: '0.6s'
+                    }}
+                  >
+                    {words[currentWordIndex]}
+                  </span>
+                </span>
+              </h1>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter text-foreground mt-1 leading-tight">
+                <span className="inline-block bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Chain Protocol
+                </span>
+              </h2>
+            </div>
             
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-xl">
+            <p className="text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl font-medium tracking-wide">
               Chain provides industry-leading Web3 and Blockchain safe protocol and process encrypted by a superb encryption server. Your information never leaves our server or be visible to anyone.
             </p>
 
@@ -203,13 +232,14 @@ export default function BonilaSection() {
           </div>
 
           {/* Hero Image */}
-          <div className="hidden lg:flex justify-center items-center animate-fade-in-right">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-3xl blur-2xl opacity-30 animate-pulse"></div>
+          <div className="flex justify-center items-center animate-fade-in-right order-1 lg:order-2">
+            <div className="relative w-full max-w-xs lg:max-w-md group">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-3xl blur-2xl opacity-40 animate-pulse group-hover:opacity-60 transition-opacity duration-500"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"></div>
               <img
                 src={HeroImage}
                 alt="Hero"
-                className="relative w-full max-w-md h-auto rounded-3xl border-2 border-primary/30 shadow-2xl shadow-primary/20 transform hover:scale-105 transition-transform duration-500 object-cover"
+                className="relative w-full h-auto rounded-3xl border-2 border-primary/30 shadow-2xl shadow-primary/20 transform hover:scale-110 transition-all duration-500 object-cover animate-float"
               />
             </div>
           </div>

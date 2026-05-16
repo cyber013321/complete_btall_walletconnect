@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Menu, Zap, X, Gem } from "lucide-react";
+import { Menu, Zap, X, Gem, Sparkles } from "lucide-react";
 import BonilaSection from "./BonilaSection";
-import FooterSection from "./FooterSection";
 import { ThemeToggle } from "./theme-toggle";
 
 export default function Layout() {
@@ -15,31 +14,10 @@ export default function Layout() {
       }
     };
 
-    const handleScroll = () => {
-      const sections = ['bonita', 'footer'];
-      let currentSection = '';
-
-      sections.forEach(sectionId => {
-        const section = document.getElementById(sectionId);
-        if (section) {
-          const rect = section.getBoundingClientRect();
-          if (rect.top <= 100 && rect.bottom >= 100) {
-            currentSection = sectionId;
-          }
-        }
-      });
-
-      if (currentSection) {
-        setActiveSection(currentSection);
-      }
-    };
-
     window.addEventListener('resize', handleResize);
-    window.addEventListener('scroll', handleScroll);
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
 
@@ -72,12 +50,12 @@ export default function Layout() {
       {/* Sidebar */}
       <div className={`fixed left-0 top-0 h-screen w-72 bg-card border-r border-border/50 z-40 transform transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:-translate-x-full'}`}>
         {/* Sidebar Header */}
-        <div className="p-8 border-b border-border/50 flex items-center justify-between">
+        <div className="p-8 border-b border-border/50 flex items-center justify-between bg-gradient-to-r from-primary/10 to-purple-500/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
-              <Zap size={20} className="text-white" />
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 animate-pulse">
+              <Sparkles size={20} className="text-white" />
             </div>
-            <h2 className="text-xl font-black tracking-tight text-foreground">Blockchain</h2>
+            <h2 className="text-lg font-black tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">ExplicitConnect</h2>
           </div>
           <button
             onClick={() => setIsMobileMenuOpen(false)}
@@ -133,27 +111,35 @@ export default function Layout() {
       {/* Main Content */}
       <div className="min-h-screen transition-all duration-300 flex flex-col items-center justify-center w-full">
         {/* Header */}
-        <header className="bg-background/80 backdrop-blur-xl p-6 border-b border-border/50 flex justify-between items-center sticky top-0 z-30 w-full">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold tracking-tight force-visible-text">BLOCKCHAIN WEB3 PRO </h1>
-            <p className="text-sm force-visible-muted">Manage your digital assets securely</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <button
-              onClick={() => scrollToSection('bonita')}
-              className="premium-button"
-            >
-              <Zap size={18} />
-              <span>Connect</span>
-            </button>
+        <header className="bg-gradient-to-r from-background via-primary/5 to-background/80 backdrop-blur-xl border-b border-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 sticky top-0 z-30 w-full shadow-xl shadow-primary/10">
+          <div className="px-6 py-5 flex justify-between items-center">
+            {/* Logo & Brand */}
+            <div className="flex items-center gap-3 group">
+              <div className="w-11 h-11 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/40 group-hover:shadow-primary/60 transition-all duration-300">
+                <Sparkles size={22} className="text-white" />
+              </div>
+              <div className="hidden sm:flex flex-col gap-0">
+                <h1 className="text-xl font-black tracking-tighter bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">ExplicitConnect</h1>
+                <p className="text-xs font-black text-primary uppercase tracking-widest leading-none">Web3 Protocol</p>
+              </div>
+            </div>
+            {/* Actions */}
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <button
+                onClick={() => scrollToSection('bonita')}
+                className="premium-button px-5 py-2.5 text-sm hidden sm:flex"
+              >
+                <Zap size={16} />
+                <span>Connect Wallet</span>
+              </button>
+            </div>
           </div>
         </header>
 
         {/* Sections */}
         <div className="w-full">
           <BonilaSection />
-          <FooterSection />
         </div>
       </div>
     </div>

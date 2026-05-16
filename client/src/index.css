@@ -47,9 +47,54 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
   }
+
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Inter', 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.02em;
+    font-weight: 900;
+    color: hsl(var(--foreground));
+    opacity: 1;
+  }
+
+  p, span, div, label, li, a {
+    opacity: 1;
+  }
+
+  .text-muted-foreground {
+    color: hsl(var(--muted-foreground)) !important;
+    font-weight: 800 !important;
+  }
+
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    color: #ffffff !important;
+  }
+
+  .dark p, .dark .text-foreground {
+    color: #ffffff !important;
+  }
+
+  .dark .text-muted-foreground {
+    color: #e2e8f0 !important;
+  }
 }
 
-/* Modern Animations */
 @layer utilities {
   @keyframes fade-in-left {
     from {
@@ -125,6 +170,69 @@
     }
   }
 
+  @keyframes slide-in-word {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes shimmer {
+    0%, 100% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+    }
+  }
+
+  @keyframes text-shimmer {
+    0% {
+      background-position: -1000px center;
+    }
+    100% {
+      background-position: 1000px center;
+    }
+  }
+
+  @keyframes word-swipe {
+    0% {
+      opacity: 0;
+      transform: translateY(30px) rotateX(-90deg);
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) rotateX(0deg);
+    }
+  }
+
+  @keyframes word-exit {
+    0% {
+      opacity: 1;
+      transform: translateY(0) rotateX(0deg);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-30px) rotateX(90deg);
+    }
+  }
+
   .animate-fade-in-left {
     animation: fade-in-left 0.6s ease-out forwards;
   }
@@ -154,6 +262,25 @@
   .animate-glow {
     animation: glow 2s ease-in-out infinite;
   }
+
+  .animate-slide-in-word {
+    animation: slide-in-word 0.8s ease-out forwards;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-text-shimmer {
+    animation: text-shimmer 8s linear infinite;
+    background-size: 1000px 100%;
+  }
+
+  .animate-word-swipe {
+    animation: word-swipe 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+  }
 }
 
 @layer components {
@@ -174,25 +301,6 @@
     content: '';
     pointer-events: none;
   }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-}
-
-@layer components {
-  .premium-button {
-    @apply inline-flex items-center justify-center gap-2 px-8 py-3 bg-primary text-primary-foreground font-black rounded-full transition-all duration-300 hover:scale-[1.02] active:scale-95 shadow-lg;
-  }
 
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-400 font-black;
@@ -205,59 +313,4 @@
   .nav-item.active {
     @apply bg-primary text-primary-foreground shadow-lg;
   }
-}
-
-/* HIGH VISIBILITY GLOBAL FIXES */
-h1, h2, h3, h4, h5, h6 {
-  color: hsl(var(--foreground)) !important;
-  font-weight: 900 !important;
-  letter-spacing: -0.025em;
-  opacity: 1 !important;
-}
-
-p, span, div, label, li, a {
-  opacity: 1 !important;
-}
-
-.text-muted-foreground {
-  color: hsl(var(--muted-foreground)) !important;
-  font-weight: 800 !important;
-}
-
-/* DARK MODE SPECIFIC OVERRIDES FOR MAXIMUM CONTRAST */
-.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-  color: #ffffff !important;
-}
-
-.dark p, .dark .text-foreground {
-  color: #ffffff !important;
-}
-
-.dark .text-muted-foreground {
-  color: #e2e8f0 !important;
-}
-
-/* Ensure background is correctly applied */
-.dark body {
-  background-color: #020617 !important;
-}
-
-section {
-  @apply relative z-10 py-20 !important;
-  width: 100%;
-}
-
-.bg-card {
-  background-color: hsl(var(--card)) !important;
-  opacity: 1 !important;
-  border-width: 1px !important;
-}
-
-/* Specific component fixes for high visibility */
-.dark .bg-accent {
-  background-color: #1e293b !important;
-}
-
-.dark .border-border {
-  border-color: #334155 !important;
 }
