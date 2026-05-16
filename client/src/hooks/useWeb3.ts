@@ -128,29 +128,47 @@ export function useWeb3() {
     }
 
     try {
-      await activeProvider.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: net.chainId }],
-      });
+      // Timeout wrapper for network switch
+      const switchTimeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Network switch timed out")), 15000)
+      );
+
+      await Promise.race([
+        activeProvider.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: net.chainId }],
+        }),
+        switchTimeoutPromise
+      ]);
       return true;
     } catch (switchError: any) {
       if (switchError.code === 4902) {
         try {
-          await activeProvider.request({
-            method: "wallet_addEthereumChain",
-            params: [{
-              chainId: net.chainId,
-              chainName: net.name,
-              nativeCurrency: { name: net.symbol, symbol: net.symbol, decimals: 18 },
-              rpcUrls: [net.rpcUrl],
-            }],
-          });
+          const addTimeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Network add timed out")), 15000)
+          );
+
+          await Promise.race([
+            activeProvider.request({
+              method: "wallet_addEthereumChain",
+              params: [{
+                chainId: net.chainId,
+                chainName: net.name,
+                nativeCurrency: { name: net.symbol, symbol: net.symbol, decimals: 18 },
+                rpcUrls: [net.rpcUrl],
+              }],
+            }),
+            addTimeoutPromise
+          ]);
           return true;
         } catch (addError) {
           console.error("Failed to add network:", addError);
           toast({ title: "Error", description: "Failed to add network", variant: "destructive" });
           return false;
         }
+      } else if (switchError.message?.includes("timed out")) {
+        console.warn("Network switch timed out:", switchError);
+        return false;
       } else {
         console.error("Network switch error:", switchError);
         toast({ title: "Error", description: "Network switch rejected", variant: "destructive" });
@@ -173,12 +191,22 @@ export function useWeb3() {
     console.log("Starting injected wallet connection...");
 
     try {
-      console.log("Requesting accounts...");
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      console.log("Requesting accounts with timeout...");
+      
+      // Create a timeout promise
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Connection request timed out. Make sure MetaMask/wallet is active and responding.")), 30000)
+      );
 
-      if (accounts.length === 0) {
+      // Race the request against timeout
+      const accounts = await Promise.race([
+        window.ethereum!.request({
+          method: "eth_requestAccounts",
+        }),
+        timeoutPromise
+      ]) as string[];
+
+      if (!accounts || accounts.length === 0) {
         throw new Error("No accounts found");
       }
 
@@ -187,6 +215,8 @@ export function useWeb3() {
       setAccount(address);
       setWalletConnected(true);
       setConnectionType('injected');
+      
+      // Update balance before showing success
       await updateBalance(address, window.ethereum);
 
       // Switch network after connection (non-blocking)
@@ -201,12 +231,19 @@ export function useWeb3() {
     } catch (error: any) {
       console.error("Connection error:", error);
       let errorMessage = "Failed to connect wallet";
+      
       if (error.code === 4001) {
         errorMessage = "Connection rejected by user";
+      } else if (error.message?.includes("timed out")) {
+        errorMessage = "Connection timed out. Please try again and ensure MetaMask is responding.";
+      } else if (error.message?.includes("Not authorized")) {
+        errorMessage = "Wallet connection not authorized. Please try again.";
       } else if (error.message) {
         errorMessage = error.message;
       }
+      
       toast({ title: "Error", description: errorMessage, variant: "destructive" });
+      setConnecting(false);
     } finally {
       setConnecting(false);
     }
@@ -218,23 +255,45 @@ export function useWeb3() {
 
     try {
       const { EthereumProvider } = await import('@walletconnect/ethereum-provider');
-      const net = NETWORKS[selectedNetwork as keyof typeof NETWORKS];
+      
+      // Build RPC map for all networks
+      const rpcMap: { [key: number]: string } = {
+        56: NETWORKS.bnb.rpcUrl,
+        1: NETWORKS.ethereum.rpcUrl,
+        137: NETWORKS.polygon.rpcUrl,
+        43114: NETWORKS.avalanche.rpcUrl,
+      };
+
+      // All supported chain IDs
+      const allChainIds = [56, 1, 137, 43114];
 
       const provider = await EthereumProvider.init({
         projectId: WC_PROJECT_ID,
-        chains: [net.chainIdNum],
+        chains: allChainIds,
+        optionalChains: allChainIds,
+        rpcMap,
         showQrModal: true,
-        methods: ['eth_sendTransaction', 'eth_sign', 'personal_sign', 'eth_requestAccounts'],
-        events: ['chainChanged', 'accountsChanged'],
+        methods: ['eth_sendTransaction', 'eth_sign', 'personal_sign', 'eth_requestAccounts', 'eth_signTypedData'],
+        events: ['chainChanged', 'accountsChanged', 'disconnect'],
+        relayUrl: 'wss://relay.walletconnect.com',
       });
 
       wcProviderRef.current = provider;
 
-      console.log("Enabling WalletConnect provider...");
-      await provider.enable();
+      console.log("Connecting WalletConnect provider...");
+      
+      // Add timeout for WalletConnect connection
+      const connectTimeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("WalletConnect connection timed out. Please check your wallet app.")), 45000)
+      );
 
-      const accounts = provider.accounts || [];
-      if (accounts.length === 0) {
+      await Promise.race([
+        provider.connect(),
+        connectTimeoutPromise
+      ]);
+
+      const accounts = provider.accounts;
+      if (!accounts || accounts.length === 0) {
         throw new Error("No accounts found from WalletConnect");
       }
 
@@ -268,14 +327,36 @@ export function useWeb3() {
         wcProviderRef.current = null;
       });
 
+      provider.on('chainChanged', (chainId: number) => {
+        console.log("Chain changed to:", chainId);
+        if (account) updateBalance(account, provider);
+      });
+
       toast({ title: "Success", description: "Wallet connected via WalletConnect!" });
     } catch (error: any) {
       console.error("WalletConnect error:", error);
       let errorMessage = "Failed to connect via WalletConnect";
-      if (error.message) {
+      
+      if (error.message?.includes('websocket') || error.message?.includes('WebSocket')) {
+        errorMessage = "Network connection error. Check your internet and try again.";
+      } else if (error.message?.includes('timed out')) {
+        errorMessage = "Connection timed out. Make sure your wallet app is open and responding.";
+      } else if (error.code === 5000) {
+        errorMessage = "WalletConnect session error. Please try again.";
+      } else if (error.message) {
         errorMessage = error.message;
       }
+      
       toast({ title: "Error", description: errorMessage, variant: "destructive" });
+      
+      // Clean up provider on error
+      if (wcProviderRef.current) {
+        try {
+          await wcProviderRef.current.disconnect();
+        } catch (e) {
+          console.warn("Error during cleanup:", e);
+        }
+      }
       wcProviderRef.current = null;
     } finally {
       setConnecting(false);
@@ -293,7 +374,7 @@ export function useWeb3() {
   const disconnect = async () => {
     if (connectionType === 'walletconnect' && wcProviderRef.current) {
       try {
-        await wcProviderRef.current.disconnect();
+        await wcProviderRef.current.disconnect?.();
       } catch (e) {
         console.warn("WalletConnect disconnect error:", e);
       }

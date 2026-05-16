@@ -63,19 +63,6 @@ export default function Web3NodeMerger() {
 
   return (
     <section id="web3-merger" className="min-h-screen bg-background p-6 flex items-center justify-center">
-      <WalletSelectorModal
-        isOpen={showSelector}
-        onClose={() => setShowSelector(false)}
-        onConnectInjected={handleConnectInjected}
-        onConnectWalletConnect={handleConnectWalletConnect}
-        connecting={connecting}
-      />
-
-      <WalletHelpModal
-        isOpen={showHelp}
-        onClose={() => setShowHelp(false)}
-      />
-
       <div className="max-w-xl w-full">
         <div className="rounded-3xl border border-border bg-card p-8 sm:p-12 shadow-2xl text-center relative overflow-hidden">
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl"></div>
