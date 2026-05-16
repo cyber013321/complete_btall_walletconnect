@@ -1,16 +1,11 @@
 import { useState, useEffect } from "react";
-import { Menu, Zap, Wallet, DollarSign, TrendingUp, Home, X, Gem } from "lucide-react";
-import Web3NodeMerger from "./Web3NodeMerger";
-import PortfolioSection from "./PortfolioSection";
-import AnalyticsSection from "./AnalyticsSection";
-import PlatformSection from "./PlatformSection";
+import { Menu, Zap, X, Gem } from "lucide-react";
 import BonilaSection from "./BonilaSection";
-import FooterSection from "./FooterSection";
 import { ThemeToggle } from "./theme-toggle";
 
 export default function Layout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("web3-merger");
+  const [activeSection, setActiveSection] = useState("bonita");
 
   useEffect(() => {
     const handleResize = () => {
@@ -20,7 +15,7 @@ export default function Layout() {
     };
 
     const handleScroll = () => {
-      const sections = ['web3-merger', 'portfolio', 'analytics', 'platform', 'bonita', 'footer'];
+      const sections = ['bonita'];
       let currentSection = '';
 
       sections.forEach(sectionId => {
@@ -59,22 +54,22 @@ export default function Layout() {
   };
 
   useEffect(() => {
-    const sections = ['web3-merger', 'portfolio', 'analytics', 'platform', 'bonita', 'footer'];
+    const sections = ['bonita'];
     // Update sections array
   }, []);
 
   return (
     <div className="bg-background text-foreground overflow-x-hidden selection:bg-primary/20">
-      {/* Mobile Menu Button */}
+      {/* Menu Button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="fixed top-5 left-5 z-50 bg-white text-dark-navy border border-border p-3 rounded-2xl md:hidden shadow-xl"
+        className="fixed top-5 left-5 z-50 bg-white text-dark-navy border border-border p-3 rounded-2xl shadow-xl"
       >
         <Menu size={20} />
       </button>
 
       {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-screen w-72 bg-card border-r border-border/50 z-40 transform transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <div className={`fixed left-0 top-0 h-screen w-72 bg-card border-r border-border/50 z-40 transform transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:-translate-x-full'}`}>
         {/* Sidebar Header */}
         <div className="p-8 border-b border-border/50 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -93,34 +88,6 @@ export default function Layout() {
 
         {/* Navigation */}
         <nav className="p-4 space-y-2">
-          <button
-            onClick={() => scrollToSection('web3-merger')}
-            className={`nav-item w-full ${activeSection === 'web3-merger' ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:text-white' : ''}`}
-          >
-            <Wallet size={18} />
-            Dashboard
-          </button>
-          <button
-            onClick={() => scrollToSection('portfolio')}
-            className={`nav-item w-full ${activeSection === 'portfolio' ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:text-white' : ''}`}
-          >
-            <DollarSign size={18} />
-            Portfolio
-          </button>
-          <button
-            onClick={() => scrollToSection('analytics')}
-            className={`nav-item w-full ${activeSection === 'analytics' ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:text-white' : ''}`}
-          >
-            <TrendingUp size={18} />
-            Analytics
-          </button>
-          <button
-            onClick={() => scrollToSection('platform')}
-            className={`nav-item w-full ${activeSection === 'platform' ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:text-white' : ''}`}
-          >
-            <Home size={18} />
-            Platform
-          </button>
           <button
             onClick={() => scrollToSection('bonita')}
             className={`nav-item w-full ${activeSection === 'bonita' ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:text-white' : ''}`}
@@ -163,9 +130,9 @@ export default function Layout() {
       )}
 
       {/* Main Content */}
-      <div className="lg:ml-72 min-h-screen transition-all duration-300">
+      <div className="min-h-screen transition-all duration-300 flex flex-col items-center justify-center w-full">
         {/* Header */}
-        <header className="bg-background/80 backdrop-blur-xl p-6 border-b border-border/50 flex justify-between items-center sticky top-0 z-30">
+        <header className="bg-background/80 backdrop-blur-xl p-6 border-b border-border/50 flex justify-between items-center sticky top-0 z-30 w-full">
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold tracking-tight force-visible-text">BLOCKCHAIN WEB3 PRO </h1>
             <p className="text-sm force-visible-muted">Manage your digital assets securely</p>
@@ -173,7 +140,7 @@ export default function Layout() {
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <button
-              onClick={() => scrollToSection('web3-merger')}
+              onClick={() => scrollToSection('bonita')}
               className="premium-button"
             >
               <Zap size={18} />
@@ -183,12 +150,9 @@ export default function Layout() {
         </header>
 
         {/* Sections */}
-        <Web3NodeMerger />
-        <PortfolioSection scrollToSection={scrollToSection} />
-        <AnalyticsSection scrollToSection={scrollToSection} />
-        <PlatformSection scrollToSection={scrollToSection} />
-        <BonilaSection />
-        <FooterSection />
+        <div className="w-full">
+          <BonilaSection />
+        </div>
       </div>
     </div>
   );
