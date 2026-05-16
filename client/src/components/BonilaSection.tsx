@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Zap, Loader2, LogOut, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Zap, Loader2, LogOut, ChevronRight, ChevronDown } from "lucide-react";
 import { useWeb3 } from "../hooks/useWeb3";
 import { useToast } from "@/hooks/use-toast";
 import WalletSelectorModal from "./WalletSelectorModal";
@@ -23,7 +23,36 @@ export default function BonilaSection() {
   const { toast } = useToast();
   const [showSelector, setShowSelector] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showNetworkDropdown, setShowNetworkDropdown] = useState(false);
+  const networkDropdownRef = useRef<HTMLDivElement>(null);
   
+  // Network emoji mapping
+  const networkEmojis: { [key: string]: string } = {
+    bnb: "🔶",
+    ethereum: "⟠",
+    polygon: "🟣",
+    avalanche: "🔴"
+  };
+
+  const networkNames: { [key: string]: string } = {
+    bnb: "BNB",
+    ethereum: "ETH",
+    polygon: "MATIC",
+    avalanche: "AVAX"
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (networkDropdownRef.current && !networkDropdownRef.current.contains(event.target as Node)) {
+        setShowNetworkDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // Word carousel state
   const words = ["blockchain", "nodes", "protocol", "blocks", "synchronization"];
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
@@ -53,9 +82,9 @@ export default function BonilaSection() {
     await connectWallet('walletconnect');
   };
 
-  const handleNetworkChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newNetwork = e.target.value;
+  const handleNetworkChange = async (newNetwork: string) => {
     setSelectedNetwork(newNetwork);
+    setShowNetworkDropdown(false);
     if (walletConnected) {
       toast({
         title: "Network Changed",
@@ -154,18 +183,47 @@ export default function BonilaSection() {
             </p>
 
             <div className="space-y-6">
-              <div className="relative group">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-2xl blur opacity-0 group-hover:opacity-75 transition-opacity duration-300"></div>
-                <select
-                  className="relative w-full h-14 bg-background text-foreground px-6 rounded-2xl border border-primary/20 text-lg font-black focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all appearance-none cursor-pointer hover:border-primary/40"
-                  value={selectedNetwork}
-                  onChange={handleNetworkChange}
+              {/* Smart Network Selector - Compact Emoji Badge */}
+              <div className="relative" ref={networkDropdownRef}>
+                <button
+                  onClick={() => setShowNetworkDropdown(!showNetworkDropdown)}
+                  className="group relative h-12 px-4 bg-background border border-primary/20 rounded-2xl flex items-center justify-between gap-2 hover:border-primary/40 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
                 >
-                  <option value="bnb">BNB Smart Chain</option>
-                  <option value="ethereum">Ethereum Mainnet</option>
-                  <option value="polygon">Polygon POS</option>
-                  <option value="avalanche">Avalanche C-Chain</option>
-                </select>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">{networkEmojis[selectedNetwork]}</span>
+                    <span className="text-sm font-black text-foreground">{networkNames[selectedNetwork]}</span>
+                  </div>
+                  <ChevronDown 
+                    size={16} 
+                    className={`text-primary transition-transform duration-300 ${showNetworkDropdown ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {/* Dropdown Menu */}
+                {showNetworkDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/20 rounded-2xl shadow-xl shadow-primary/20 overflow-hidden z-50 backdrop-blur-sm">
+                    {Object.entries(NETWORKS).map(([key, network]) => (
+                      <button
+                        key={key}
+                        onClick={() => handleNetworkChange(key)}
+                        className={`w-full px-4 py-3 flex items-center gap-3 transition-all duration-200 ${
+                          selectedNetwork === key 
+                            ? 'bg-primary/10 border-l-4 border-primary' 
+                            : 'hover:bg-primary/5 border-l-4 border-transparent'
+                        }`}
+                      >
+                        <span className="text-xl">{networkEmojis[key]}</span>
+                        <div className="text-left">
+                          <div className="text-sm font-black text-foreground">{network.name}</div>
+                          <div className="text-xs font-black text-primary uppercase tracking-widest">{networkNames[key]}</div>
+                        </div>
+                        {selectedNetwork === key && (
+                          <div className="ml-auto w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {!walletConnected ? (

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Menu, Zap, X, Gem, Sparkles } from "lucide-react";
+import { Menu, Zap, X, Gem } from "lucide-react";
 import BonilaSection from "./BonilaSection";
 import { ThemeToggle } from "./theme-toggle";
+import HeroImage from "../image/IMG_1843.jpeg";
 
 export default function Layout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -52,8 +53,8 @@ export default function Layout() {
         {/* Sidebar Header */}
         <div className="p-8 border-b border-border/50 flex items-center justify-between bg-gradient-to-r from-primary/10 to-purple-500/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 animate-pulse">
-              <Sparkles size={20} className="text-white" />
+            <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-lg shadow-primary/30 border-2 border-blue-500/50">
+              <img src={HeroImage} alt="ExplicitConnect" className="w-full h-full object-cover" />
             </div>
             <h2 className="text-lg font-black tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">ExplicitConnect</h2>
           </div>
@@ -112,26 +113,27 @@ export default function Layout() {
       <div className="min-h-screen transition-all duration-300 flex flex-col items-center justify-center w-full">
         {/* Header */}
         <header className="bg-gradient-to-r from-background via-primary/5 to-background/80 backdrop-blur-xl border-b border-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 sticky top-0 z-30 w-full shadow-xl shadow-primary/10">
-          <div className="px-6 py-5 flex justify-between items-center">
+          <div className="px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center gap-2 sm:gap-4">
             {/* Logo & Brand */}
-            <div className="flex items-center gap-3 group">
-              <div className="w-11 h-11 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/40 group-hover:shadow-primary/60 transition-all duration-300">
-                <Sparkles size={22} className="text-white" />
+            <div className="flex items-center gap-2 sm:gap-3 group min-w-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 flex-shrink-0 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg shadow-primary/40 group-hover:shadow-primary/60 transition-all duration-300 border-2 border-blue-500/50">
+                <img src={HeroImage} alt="ExplicitConnect" className="w-full h-full object-cover" />
               </div>
-              <div className="hidden sm:flex flex-col gap-0">
-                <h1 className="text-xl font-black tracking-tighter bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">ExplicitConnect</h1>
+              <div className="flex flex-col gap-0 min-w-0">
+                <h1 className="text-base sm:text-xl font-black tracking-tighter bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent truncate">ExplicitConnect</h1>
                 <p className="text-xs font-black text-primary uppercase tracking-widest leading-none">Web3 Protocol</p>
               </div>
             </div>
             {/* Actions */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               <ThemeToggle />
               <button
                 onClick={() => scrollToSection('bonita')}
-                className="premium-button px-5 py-2.5 text-sm hidden sm:flex"
+                className="premium-button px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm flex"
               >
-                <Zap size={16} />
-                <span>Connect Wallet</span>
+                <Zap size={14} className="sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Connect Wallet</span>
+                <span className="sm:hidden">Connect</span>
               </button>
             </div>
           </div>
